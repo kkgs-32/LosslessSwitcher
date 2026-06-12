@@ -8,6 +8,7 @@
 import Observation
 import SwiftUI
 
+@MainActor
 @Observable
 class MenuBarController {
     @ObservationIgnored

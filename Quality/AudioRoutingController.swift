@@ -53,6 +53,16 @@ class AudioRoutingController: ObservableObject {
         self.outputDevices = outputDevices
         self.virtualProxy = VirtualAudioProxy(outputDevices: outputDevices)
         self.virtualProxy.startProxy()
+        
+        // Register callback to receive sample rate changes from the Audio Plugin
+        // Audio Plugin からサンプルレート変更通知を受け取るコールバックを登録
+        AudioPluginBridge.shared.registerSampleRateChangeCallback { [weak self] info in
+            Task { @MainActor in
+                self?.onAudioSourceDetected(info)
+            }
+        }
+        
+        virtualDeviceStatus = "Audio Plugin initialized, waiting for input..."
     }
 
     var rankedSources: [AudioSource] {
@@ -160,11 +170,50 @@ class AudioRoutingController: ObservableObject {
                                 bitDepth: Int) -> AudioStreamBasicDescription? {
         let streams = device.streams(scope: .output)
         let availableFormats = streams?.first?.availablePhysicalFormats?.compactMap { $0.mFormat }
-        let candidate = availableFormats?.min(by: { lhs, rhs in
-            let lhsDelta = abs(lhs.mSampleRate - sampleRate) + abs(Double(lhs.mBitsPerChannel - Int32(bitDepth))) * 10
-            let rhsDelta = abs(rhs.mSampleRate - sampleRate) + abs(Double(rhs.mBitsPerChannel - Int32(bitDepth))) * 10
+        
+        guard let formats = availableFormats, !formats.isEmpty else {
+            return nil
+        }
+        
+        let candidate = formats.min(by: { lhs, rhs in
+            let lhsDelta = self.calculateFormatDelta(lhs, targetRate: sampleRate, targetBitDepth: bitDepth)
+            let rhsDelta = self.calculateFormatDelta(rhs, targetRate: sampleRate, targetBitDepth: bitDepth)
             return lhsDelta < rhsDelta
         })
         return candidate
+    }
+    
+    private func calculateFormatDelta(_ format: AudioStreamBasicDescription,
+                                     targetRate: Double,
+                                     targetBitDepth: Int) -> Double {
+        let rateDelta = abs(format.mSampleRate - targetRate)
+        let bitDepthDelta = abs(Double(Int32(format.mBitsPerChannel) - Int32(targetBitDepth))) * 10
+        return rateDelta + bitDepthDelta
+    }
+    
+    /// Called when the Audio Plugin detects a sample rate change
+    /// Audio Plugin がサンプルレート変更を検出したときに呼ばれる
+    /// この関数は仮想デバイスから直接呼ばれます。
+    /// 
+    /// This function is called directly from the virtual device.
+    @MainActor
+    private func onAudioSourceDetected(_ info: AudioPluginBridge.SampleRateChangeInfo) {
+        print("[AudioRoutingController] Source detected: \(info.bundleID) at \(info.newSampleRate) Hz / \(info.bitDepth) bit")
+        
+        // Extract app name from bundle ID (simplified)
+        // バンドルID からアプリ名を抽出（簡略版）
+        let appName = info.bundleID.components(separatedBy: ".").last ?? info.bundleID
+        
+        // Add or update the source in our priority list
+        // 優先度リストにソースを追加または更新
+        self.addOrUpdateSource(
+            pid: info.processID,
+            bundleID: info.bundleID,
+            appName: appName,
+            sampleRate: info.newSampleRate,
+            bitDepth: Int(info.bitDepth),
+            sourceURL: nil,
+            isNotificationSource: false
+        )
     }
 }

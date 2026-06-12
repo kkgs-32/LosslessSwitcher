@@ -157,6 +157,29 @@ struct MenuView: View {
             }
             
             Menu {
+                Text("Audio Plugin Status: \(audioRoutingController.virtualDeviceStatus)")
+                    .font(.caption)
+                
+                Divider()
+                
+                Text("Virtual Device Configuration")
+                    .font(.caption)
+                    .fontWeight(.semibold)
+                
+                Button("Re-initialize Plugin") {
+                    audioRoutingController.virtualDeviceStatus = "Plugin re-initializing..."
+                }
+                
+                Button("Show Audio MIDI Setup") {
+                    let appURL = URL(fileURLWithPath: "/Applications/Utilities/Audio MIDI Setup.app")
+                    NSWorkspace.shared.open(appURL)
+                }
+                
+            } label: {
+                Text("Virtual Device")
+            }
+            
+            Menu {
                 Text("Version - \(currentVersion)")
                 Text("Build - \(currentBuild)")
             } label: {
