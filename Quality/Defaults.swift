@@ -37,12 +37,6 @@ class Defaults: ObservableObject {
         self.userPreferAutoUpdateCheck = UserDefaults.standard.bool(forKey: kUserPreferAutoUpdateCheck)
     }
     
-    @Published var userPreferSampleRateMultiples: Bool {
-        willSet {
-            UserDefaults.standard.set(newValue, forKey: kUserPreferSampleRateMultiples)
-        }
-    }
-    
     @Published var userPreferIconStatusBarItem: Bool {
         willSet {
             UserDefaults.standard.set(newValue, forKey: kUserPreferIconStatusBarItem)
