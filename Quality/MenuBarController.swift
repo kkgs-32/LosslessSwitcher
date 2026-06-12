@@ -14,11 +14,15 @@ class MenuBarController {
     var outputDevices: OutputDevices!
     
     @ObservationIgnored
+    var audioRoutingController: AudioRoutingController!
+    
+    @ObservationIgnored
     private var mrController: MediaRemoteController!
     
     init() {
         let outputDevices = OutputDevices()
         self.outputDevices = outputDevices
+        self.audioRoutingController = AudioRoutingController(outputDevices: outputDevices)
         self.mrController = MediaRemoteController(outputDevices: outputDevices)
     }
 }

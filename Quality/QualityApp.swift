@@ -19,6 +19,7 @@ struct QualityApp: App {
         MenuBarExtra {
             MenuView()
                 .environmentObject(controller.outputDevices)
+                .environmentObject(controller.audioRoutingController)
                 .environmentObject(defaults)
         } label: {
             if defaults.userPreferIconStatusBarItem {

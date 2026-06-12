@@ -14,18 +14,27 @@ class Defaults: ObservableObject {
     private let kUserPreferBitDepthDetection = "com.vincent-neo.LosslessSwitcher-Key-BitDepthDetection"
     private let kShellScriptPath = "KeyShellScriptPath"
     private let kUserPreferSampleRateMultiples = "PreferSampleRateMultiples"
+    private let kUserPreferLowLatencyMode = "PreferLowLatencyMode"
+    private let kUserPreferMuteNotifications = "PreferMuteNotifications"
+    private let kUserPreferAutoUpdateCheck = "PreferAutoUpdateCheck"
     
     private init() {
         UserDefaults.standard.register(defaults: [
             kUserPreferIconStatusBarItem : true,
             kUserPreferBitDepthDetection : false,
-            kUserPreferSampleRateMultiples : false
+            kUserPreferSampleRateMultiples : false,
+            kUserPreferLowLatencyMode : false,
+            kUserPreferMuteNotifications : false,
+            kUserPreferAutoUpdateCheck : true
         ])
         
         self.shellScriptPath = UserDefaults.standard.string(forKey: kShellScriptPath)
         self.userPreferIconStatusBarItem = UserDefaults.standard.bool(forKey: kUserPreferIconStatusBarItem)
         self.userPreferBitDepthDetection = UserDefaults.standard.bool(forKey: kUserPreferBitDepthDetection)
         self.userPreferSampleRateMultiples = UserDefaults.standard.bool(forKey: kUserPreferSampleRateMultiples)
+        self.userPreferLowLatencyMode = UserDefaults.standard.bool(forKey: kUserPreferLowLatencyMode)
+        self.userPreferMuteNotifications = UserDefaults.standard.bool(forKey: kUserPreferMuteNotifications)
+        self.userPreferAutoUpdateCheck = UserDefaults.standard.bool(forKey: kUserPreferAutoUpdateCheck)
     }
     
     @Published var userPreferSampleRateMultiples: Bool {
@@ -52,6 +61,30 @@ class Defaults: ObservableObject {
     @Published var shellScriptPath: String? {
         willSet {
             UserDefaults.standard.setValue(newValue, forKey: kShellScriptPath)
+        }
+    }
+    
+    @Published var userPreferSampleRateMultiples: Bool {
+        willSet {
+            UserDefaults.standard.set(newValue, forKey: kUserPreferSampleRateMultiples)
+        }
+    }
+    
+    @Published var userPreferLowLatencyMode: Bool {
+        willSet {
+            UserDefaults.standard.set(newValue, forKey: kUserPreferLowLatencyMode)
+        }
+    }
+    
+    @Published var userPreferMuteNotifications: Bool {
+        willSet {
+            UserDefaults.standard.set(newValue, forKey: kUserPreferMuteNotifications)
+        }
+    }
+    
+    @Published var userPreferAutoUpdateCheck: Bool {
+        willSet {
+            UserDefaults.standard.set(newValue, forKey: kUserPreferAutoUpdateCheck)
         }
     }
     
