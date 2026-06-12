@@ -140,11 +140,6 @@ struct MenuView: View {
                     }
                     Text("Default Device")
                 }
-                    if outputDevices.selectedOutputDevice == nil {
-                        Image(systemName: "checkmark")
-                    }
-                    Text("Default Device")
-                }
 
                 ForEach(outputDevices.outputDevices, id: \.uid) { device in
                     Button {
